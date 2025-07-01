@@ -96,42 +96,78 @@ class UserOwnedAINewsletter {
 
   async getRecentPostsFromFollowing(following, hoursBack = 24) {
     console.log(`\n📰 Fetching posts from last ${hoursBack} hours...`);
+    console.log('⚠️  Note: Using timeline API instead of search (Free tier limitation)');
     
     const allPosts = [];
-    const startTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000).toISOString();
+    const startTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
     
     // Process in batches to avoid rate limits
     const batchSize = 5;
-    for (let i = 0; i < Math.min(following.length, 20); i += batchSize) {
+    const maxAccounts = Math.min(following.length, 20); // Limit to 20 accounts to avoid rate limits
+    
+    for (let i = 0; i < maxAccounts; i += batchSize) {
       const batch = following.slice(i, i + batchSize);
       
       await Promise.all(batch.map(async (user) => {
         try {
-          // Use search instead of timeline due to API limitations
-          const query = `from:${user.username} -is:retweet -is:reply`;
-          const tweets = await this.v2Client.search(query, {
+          // Get user details first if not already available
+          let userId = user.id;
+          let userDetails = user;
+          
+          // If we don't have the user ID, fetch it
+          if (!userId) {
+            const userLookup = await this.v2Client.userByUsername(user.username, {
+              'user.fields': ['id', 'name', 'username', 'verified', 'public_metrics']
+            });
+            
+            if (!userLookup.data) {
+              console.log(`  ⚠️  ${user.username}: User not found`);
+              return;
+            }
+            userDetails = userLookup.data;
+            userId = userDetails.id;
+          }
+          
+          // Get user timeline (Free tier compatible)
+          const tweets = await this.v2Client.userTimeline(userId, {
             max_results: 10,
-            'tweet.fields': ['created_at', 'public_metrics', 'context_annotations', 'entities'],
+            exclude: ['retweets', 'replies'],
+            'tweet.fields': ['created_at', 'public_metrics', 'context_annotations', 'entities', 'author_id'],
             'user.fields': ['name', 'username', 'verified']
           });
           
           if (tweets.data && tweets.data.length > 0) {
-            const postsWithAuthor = tweets.data.map(tweet => ({
-              ...tweet,
-              author: user,
-              relevance_score: this.calculateRelevance(tweet, user),
-              url: `https://x.com/${user.username}/status/${tweet.id}`
-            }));
+            // Filter tweets by time
+            const recentTweets = tweets.data.filter(tweet => {
+              const tweetTime = new Date(tweet.created_at);
+              return tweetTime >= startTime;
+            });
             
-            allPosts.push(...postsWithAuthor);
-            console.log(`  ✓ ${user.username}: ${tweets.data.length} posts`);
+            if (recentTweets.length > 0) {
+              const postsWithAuthor = recentTweets.map(tweet => ({
+                ...tweet,
+                author: userDetails,
+                relevance_score: this.calculateRelevance(tweet, userDetails),
+                url: `https://x.com/${userDetails.username}/status/${tweet.id}`
+              }));
+              
+              allPosts.push(...postsWithAuthor);
+              console.log(`  ✓ ${user.username}: ${recentTweets.length} recent posts`);
+            } else {
+              console.log(`  - ${user.username}: No posts in timeframe`);
+            }
           }
         } catch (error) {
-          console.error(`  ✗ Error fetching posts from ${user.username}:`, error.message);
+          if (error.code === 429) {
+            console.error(`  ⚠️  Rate limit hit. Waiting 15 seconds...`);
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          } else {
+            console.error(`  ✗ Error fetching posts from ${user.username}:`, error.message);
+          }
         }
       }));
       
-      // Rate limit protection
+      // Rate limit protection between batches
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
     
