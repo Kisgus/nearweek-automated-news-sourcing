@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
@@ -7,13 +8,27 @@ const { TwitterApi } = require('twitter-api-v2');
 
 class UserOwnedAINewsletter {
   constructor(config = {}) {
-    // Initialize X API client
-    this.client = new TwitterApi({
-      appKey: process.env.X_API_KEY || process.env.TWITTER_API_KEY,
-      appSecret: process.env.X_API_SECRET || process.env.TWITTER_API_SECRET,
-      accessToken: process.env.X_ACCESS_TOKEN || process.env.TWITTER_ACCESS_TOKEN,
-      accessSecret: process.env.X_ACCESS_SECRET || process.env.TWITTER_ACCESS_SECRET,
-    });
+    // Initialize X API client with proper key mapping
+    const apiKey = process.env.X_API_KEY || process.env.TWITTER_API_KEY;
+    const apiSecret = process.env.X_API_SECRET || process.env.TWITTER_API_SECRET;
+    const accessToken = process.env.X_ACCESS_TOKEN || process.env.TWITTER_ACCESS_TOKEN;
+    const accessSecret = process.env.X_ACCESS_SECRET || process.env.TWITTER_ACCESS_TOKEN_SECRET;
+    
+    // Use Bearer Token for read-only operations
+    if (process.env.TWITTER_BEARER_TOKEN) {
+      console.log('📡 Using Bearer Token authentication for X API');
+      this.client = new TwitterApi(process.env.TWITTER_BEARER_TOKEN);
+    } else if (apiKey && apiSecret && accessToken && accessSecret) {
+      console.log('🔑 Using OAuth 1.0a authentication for X API');
+      this.client = new TwitterApi({
+        appKey: apiKey,
+        appSecret: apiSecret,
+        accessToken: accessToken,
+        accessSecret: accessSecret,
+      });
+    } else {
+      throw new Error('Twitter API credentials not properly configured. Need either Bearer Token or full OAuth credentials.');
+    }
     
     this.v2Client = this.client.v2;
     this.username = 'userownedai';
