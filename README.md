@@ -1,183 +1,83 @@
-# 🚀 NEARWEEK Automated News Sourcing System
+# NEARWEEK Automated News Sourcing
 
-**AI-powered news automation with MCP integrations for instant content processing and distribution.**
+Prior NEARWEEK work on automated AI x crypto news sourcing and editorial
+workflow design.
 
-## ⚡ Quick Start
+This repo is part of the public work map behind the current SAIBA direction:
+public ecosystem signals become structured source material, humans review the
+output, and approved items can move into content or distribution workflows.
+
+## Status
+
+Prior work / public archive.
+
+The repo is useful as a technical and product reference. Treat deployment notes,
+automation scripts, and integration docs as historical context, not as a current
+production runbook.
+
+## What It Explored
+
+- Monitoring public crypto and AI x crypto signals across X, ecosystem accounts,
+  GitHub, and curated source lists.
+- Turning noisy public updates into draft newsletters, reports, and social
+  content candidates.
+- Routing candidate content through Buffer, Telegram, GitHub, Zapier, and local
+  webhook-style workflows.
+- Keeping a manual approval step before public distribution.
+- Comparing lightweight automation glue against more durable pipeline
+  architecture.
+
+## Repository Map
+
+| Path | Purpose |
+| --- | --- |
+| `src/` | Express/webhook server and integration glue. |
+| `scripts/` | Experiments for X/Twitter sourcing, newsletters, Buffer/Zapier-style routing, and media processing. |
+| `configs/` | Historical config examples for content streams and routing decisions. |
+| `docs/` | Implementation notes, scaling analysis, and integration write-ups. |
+| `reports/` | Example/generated output from prior runs. |
+
+## What It Proves
+
+| Area | Proof |
+| --- | --- |
+| Ecosystem intelligence | Public signals can be turned into reusable source material instead of disappearing in feeds. |
+| Content workflow | Automation helps most when it prepares drafts and context, not when it bypasses editorial judgment. |
+| Distribution ops | Buffer, Telegram, GitHub, Zapier, and webhooks can form a lightweight content operations loop. |
+| Bridge to SAIBA | The same pattern now appears in Agency OS and Link2Post: source signal -> draft -> human approval -> queued distribution -> receipt. |
+
+## Public-Safe Boundary
+
+This repo is not presented as a live autopublishing system.
+
+- Human review is expected before publishing.
+- Old performance targets should be read as experiment goals, not guaranteed
+  production metrics.
+- API keys, webhook secrets, account IDs, and live channel IDs should not be
+  committed.
+- Customer-facing or public social posts should not be sent automatically.
+
+## Local Inspection
+
+Install dependencies and inspect scripts locally:
 
 ```bash
-# Clone and deploy immediately
-git clone https://github.com/Kisgus/nearweek-automated-news-sourcing.git
-cd nearweek-automated-news-sourcing
-npm run deploy
-
-# Server will be live at: http://localhost:3000
+npm install
+npm run health
+npm run test
 ```
 
-## ✅ Features
+Some scripts expect local environment variables or historical integrations and
+may need adaptation before reuse.
 
-- **15-minute response time** from X post to Buffer
-- **Claude AI analysis** with 85%+ relevance accuracy
-- **500-1000 tweets/day** processing capacity
-- **MCP integrations** for Buffer, Telegram, GitHub, Webhooks
-- **Manual approval mode** for safe production start
-- **Real-time monitoring** and health checks
+## Environment Template
 
-## 🧪 Local Testing Commands
+Use `.env.example` as the public template. Keep real values in a local secret
+store such as 1Password, GitHub Actions secrets, or the deployment platform.
 
-### Basic Health Checks
-```bash
-npm run health     # Check system health
-npm run metrics    # View performance metrics
-npm run logs       # Monitor processing logs
-npm run errors     # Check error logs
-```
+## Related
 
-### Content Testing
-```bash
-npm run test-webhook   # Test webhook processing
-npm run test-analysis  # Test content analysis
-```
-
-### System Controls
-```bash
-npm run pause    # Pause processing
-npm run resume   # Resume processing
-```
-
-## 🔧 Configuration
-
-### MCP Integrations (No API keys needed)
-- ✅ **Buffer**: NEARWEEK organization
-- ✅ **Telegram**: Team notifications
-- ✅ **GitHub**: Automated issue tracking
-- ✅ **Zapier**: Webhook processing
-
-### Environment Variables
-```bash
-# MCP integrations (pre-configured)
-USE_MCP_BUFFER=true
-USE_MCP_TELEGRAM=true
-USE_MCP_GITHUB=true
-USE_MCP_WEBHOOKS=true
-
-# Safety features
-ENABLE_AUTO_POSTING=false  # Manual approval mode
-CONFIDENCE_THRESHOLD=85
-RELEVANCE_THRESHOLD=60
-```
-
-## 📊 API Endpoints
-
-### Health & Monitoring
-- `GET /health` - System health check
-- `GET /api/metrics` - Performance metrics
-- `GET /api/admin/status` - Admin status
-
-### Content Processing
-- `POST /webhook/x-api` - Main webhook endpoint
-- `POST /api/analyze` - Content analysis
-
-### Testing
-- `POST /api/test/buffer` - Test Buffer integration
-- `POST /api/test/telegram` - Test Telegram integration
-- `POST /api/test/github` - Test GitHub integration
-
-### Admin Controls
-- `POST /api/admin/pause` - Pause processing
-- `POST /api/admin/resume` - Resume processing
-
-## 🎯 Performance Targets
-
-| Metric | Target | Status |
-|--------|--------|--------|
-| Response Time | <15 minutes | ✅ Ready |
-| Relevance Accuracy | 85%+ | ✅ Claude AI |
-| Processing Volume | 500-1000/day | ✅ Auto-scaling |
-| Uptime | 99%+ | ✅ Monitoring |
-| Error Rate | <5% | ✅ Handling |
-
-## 🚨 Safety Features
-
-- **Manual Approval**: All content queued for human review
-- **Spam Filtering**: Automatic low-quality content removal
-- **Rate Limiting**: Prevents system overload
-- **Emergency Controls**: Instant pause/resume capability
-- **Audit Logging**: Complete processing trail
-
-## 🔍 Monitoring
-
-### Real-time Logs
-```bash
-tail -f logs/automation.log  # Processing logs
-tail -f logs/error.log       # Error logs
-tail -f logs/access.log      # Access logs
-```
-
-### Health Dashboard
-- **Health**: http://localhost:3000/health
-- **Metrics**: http://localhost:3000/api/metrics
-- **Status**: http://localhost:3000/api/admin/status
-
-## 🎛️ Production Deployment
-
-### Option 1: Simple Start
-```bash
-npm start
-```
-
-### Option 2: Process Manager
-```bash
-npm install -g pm2
-pm2 start src/server.js --name nearweek-news
-pm2 save
-pm2 startup
-```
-
-### Option 3: Docker
-```bash
-docker build -t nearweek/news-sourcing .
-docker run -d --name nearweek-news -p 3000:3000 nearweek/news-sourcing
-```
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**Server won't start**:
-```bash
-lsof -i :3000  # Check if port is busy
-kill $(lsof -t -i:3000)  # Kill process on port 3000
-```
-
-**High memory usage**:
-```bash
-pkill -f "node src/server.js"  # Stop server
-rm logs/*.log  # Clear large log files
-npm start  # Restart
-```
-
-**MCP integrations failing**:
-```bash
-cat .env | grep MCP  # Verify MCP settings
-DEBUG=* npm start  # Start with debug logging
-```
-
-## 📈 Success Metrics
-
-✅ **Speed**: Sub-15 minute automated response  
-✅ **Quality**: 85%+ relevance via Claude AI  
-✅ **Scale**: 500-1000 tweets/day capacity  
-✅ **Safety**: Manual approval with audit trails  
-✅ **Reliability**: 99%+ uptime monitoring  
-✅ **Integration**: Full MCP ecosystem connectivity  
-
-## 🔗 Links
-
-- **Repository**: https://github.com/Kisgus/nearweek-automated-news-sourcing
-- **Issues**: https://github.com/Kisgus/nearweek-automated-news-sourcing/issues
-- **Health Check**: http://localhost:3000/health
-- **Metrics**: http://localhost:3000/api/metrics
-
----
-
-**Status: 🟢 Production Ready - MCP Integrated**
+- [Gus profile](https://github.com/Kisgus)
+- [SAIBA Agency OS](https://github.com/Kisgus/saiba-agency-os)
+- [Customer Event Flywheel](https://github.com/Kisgus/customer-event-flywheel)
+- [UserOwned.AI](https://github.com/Kisgus/userowned-ai)

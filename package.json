@@ -1,7 +1,7 @@
 {
   "name": "nearweek-automated-news-sourcing",
   "version": "2.0.0",
-  "description": "NEARWEEK Multi-Stream Content Generation System with Figma Integration",
+  "description": "Prior NEARWEEK AI x crypto news-sourcing and editorial workflow experiments.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -64,7 +64,7 @@
     "content-generation",
     "multi-stream"
   ],
-  "author": "NEARWEEK",
+  "author": "Gus / NEARWEEK",
   "license": "MIT",
   "repository": {
     "type": "git",
